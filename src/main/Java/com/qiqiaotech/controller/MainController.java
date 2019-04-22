@@ -1,18 +1,17 @@
 package com.qiqiaotech.controller;
 
 import com.qiqiaotech.something.SomeObject;
-import com.qiqiaotech.something.impl.SomeObjectImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
+import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.context.ContextLoader;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.servlet.FrameworkServlet;
 
 import javax.servlet.ServletContext;
 
-@RestController
+@Controller
 public class MainController {
 
     @Autowired
@@ -21,7 +20,7 @@ public class MainController {
     @RequestMapping("/")
     public String init() {
         someObject.printSomething();
-        return "first WebApp";
+        return "index";
     }
 
 
