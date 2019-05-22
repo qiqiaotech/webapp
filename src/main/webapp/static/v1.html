@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>V1</title>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/vue@2.6.10/dist/vue.js"></script>
+</head>
+<body>
+    <div id="ele">
+        <div>{{message}}</div>
+        <input type="button" @click="clickMe" value="点击" />
+    </div>
+</body>
+<script type="text/javascript">
+    var app = new Vue({
+        el: '#ele',
+        data: {
+            message: 'Vue'
+        },
+        methods: {
+            clickMe: function() {
+                this.message = this.message.split('').reverse().join('')
+                console.log('HelloKitty'.split(''))
+            }
+        }
+    })
+</script>
+</html>
