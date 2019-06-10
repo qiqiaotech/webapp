@@ -1,17 +1,82 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" xmlns:v-bind="http://www.w3.org/1999/xhtml" xmlns:v-slot="http://www.w3.org/1999/XSL/Transform">
 <head>
     <meta charset="UTF-8">
     <title>V1</title>
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/vue@2.6.10/dist/vue.js"></script>
-</head>
+    </head>
 <body>
     <div id="ele">
         <div>{{message}}</div>
-        <input type="button" @click="clickMe" value="点击" />
+        <input type="button" @click="clickMe" value="双向绑定" />
+    </div>
+    <div>======================================================</div>
+    <div v-once id="vonce">
+        <div>{{change}}</div>
+        <input type="button" @click="clickMe" value ="v-once测试" />
+    </div>
+    <div>======================================================</div>
+    <div id="vhtml">
+        <div>使用模板变量html: {{htmlstr}}</div>
+        <div>使用v-html标签：<span v-html="htmlstr"></span></div>
+        <div v-bind:ref="id">v-bind定义ID属性</div>
+        <button @click="clickMe">测试动态元素</button>
+    </div>
+    <div>======================================================</div>
+    <div id="vcomputed">
+
+        <div>{{c}}</div>
+        <div v-bind:class="classObj">A is {{a}}</div>
+        <div>B is {{b}}</div>
+        <div>W is {{w}}</div>
+        <div>A:<input type="text" v-model="a"></div>
+        <div>B:<input type="text" v-model="b"></div>
+
+    </div>
+    <div>======================================================</div>
+    <div id="comp">
+        <simple-comp prop1="标签" prop2="123"  placeholder="placeholder属性" @testclick="test()"></simple-comp>
+    </div>
+    <div>======================================================</div>
+    <div id="blog-spot">
+        <div v-for="post in posts">
+            <blog-spot v-bind="post">mm</blog-spot>
+        </div>
+    </div>
+    <div>======================================================</div>
+    <div id="base-input">
+        <base-input v-bind:label="label"
+                v-model="username"
+                required
+                placeholder="Enter your username"
+        ></base-input>
+    </div>
+    <div>======================================================</div>
+    <div id="inherited-prop">
+        <child1 :p-child1="child1" :p-child2="child2" v-on:test1="onTest1" v-on:test2="onTest2">
+        </child1>
+    </div>
+    <div>======================================================</div>
+    <div id="custom-define-event-component">
+        <sd-event-comp>
+            <template v-slot:custom-define-slot="mm">
+                {{mm.user.lastName}}
+            </template>
+            <template v-slot:slot1>slot1</template>
+        </sd-event-comp>
+    </div>
+    <div>======================================================</div>
+    <div id="slot-other-usage">
+        <slot-other-comp>
+            <template v-slot:show-data="X">
+                <span v-if="X.todo.isset==true">✓</span>
+                {{X.todo.name}}
+            </template>
+        </slot-other-comp>
     </div>
 </body>
 <script type="text/javascript">
+
     var app = new Vue({
         el: '#ele',
         data: {
@@ -20,9 +85,253 @@
         methods: {
             clickMe: function() {
                 this.message = this.message.split('').reverse().join('')
-                console.log('HelloKitty'.split(''))
+                console.log('HelloKitty'.split())
             }
         }
     })
+
+    var vonce = new Vue({
+        el: '#vonce',
+        data: {
+            change: 'Change'
+        },
+        methods: {
+            clickMe: function() {
+                alert('执行变化过程')
+                this.change = 'Changed'
+            }
+        }
+    })
+
+    var vhtml = new Vue({
+        el: '#vhtml',
+        data: {
+            id: 'idName',
+            htmlstr: '<p style="color:red">这是一段红色文字{{id}}</p>'
+        },
+        methods: {
+          clickMe: function() {
+              console.log(this.$refs.idName.color='red')
+          }
+        }
+    })
+
+    var vcomputed = new Vue({
+        el: '#vcomputed'
+        , data: {
+            a: 0,
+            b: 0,
+            w: 0,
+            isRed: true,
+            classObj: {
+                bluefont: true
+            }
+        }
+        ,computed: {
+            c: function() {
+                return this.a+this.b
+            }
+        }
+        ,watch: {
+            a: function() {
+                return this.w = this.a+ this.b
+            }
+        }
+    })
+
+    Vue.component('simple-comp', {
+        props:{
+            prop1: String,
+            prop2: String
+        },
+        data: function() {
+            return {
+                count: 0
+            }
+
+        },
+        template: `
+            <div>
+            <button @click="count++;$emit('testclick')">clickMe {{count}} times</button>
+            <div>
+            <label>{{prop1}}</label>
+            <input type="text">
+            <label>{{prop2}}</label>
+            </div>
+            </div>
+            `,
+
+        mounted: function() {
+            console.log(this.$attrs)
+        },
+    })
+
+    Vue.component('blog-spot', {
+        props: ['title', 'author', 'content'],
+        data: function() {
+            return { num: 0}
+        },
+        template: `
+        <div>
+            <h3>{{title}}</h3>
+            <div>作者：{{author}}</div>
+            <div>{{content}}</div>
+            <slot>{{num}}</slot>
+        </div>
+        `,
+        mounted: function() {
+            //this.title ='???'       //如果这么写，VUE会警告，对于prop属性需要向子组件传递，
+                                      // 修改后会影响所有子组件，这是不对的
+        }
+    })
+
+    Vue.component('base-input', {
+        //inheritAttrs: false,
+        props: ['label', 'value'],
+        template: `
+            <label>
+              {{ label }}
+              <input
+                v-bind="$attrs"
+                v-bind:value="value"
+                v-on:input="$emit('input', $event.target.value)"
+              >
+            </label>
+          `
+    })
+
+    Vue.component('child2', {
+        inheritAttrs: false,
+        props:['pChild2'],
+        mounted() {
+            this.$emit('test2')
+        },
+        template:`
+        <div class="child-2">
+        <p>in child2:</p>
+        <p>props: {{pChild2}}</p>
+        <p>$attrs: {{$attrs}}</p>
+        <hr>
+        </div>
+        `
+    })
+
+    Vue.component('child1', {
+        //inheritAttrs: false,
+        props: ['pChild1'],
+        mounted() {
+            this.$emit('test1')
+        },
+        template: `
+        <div class="child-1">
+            <p>in child1:</p>
+            <p>props: {{pChild1}}</p>
+            <p>$attrs: {{$attrs}}</p>
+            <hr>
+            <child2  v-bind="$attrs" v-on="$listeners"></child2>
+        </div>
+        `
+    })
+
+    Vue.component('sd-event-comp', {
+        props: ['value'],
+        data() {
+            return {user:{firstName: 'qiyang', lastName:'yan'}}
+        },
+        template:`
+            <div>
+                <slot name="slot1"></slot>
+                    <input
+                     v-bind:value="value"
+                     v-on:input="$emit('input', $event.target.value)"
+                     >
+                 <slot name="custom-define-slot" v-bind:user="user">
+                    {{user.firstName}}
+                 </slot>
+             </div>
+        `
+    })
+
+    Vue.component('slot-other-comp', {
+        props: ['todo'],
+        data() {
+            return {todos:[{id:1, name:'todo1',isset: true},{id:2, name:'todo2', isset:false}]}
+        },
+        template: `
+            <ul>
+                <li v-for="todo in todos" v-bind:key="todo.id">
+                    <slot name="show-data" v-bind:todo="todo">{{todo.name}}</slot>
+                </li>
+            </ul>
+        `
+    })
+
+    new Vue({
+        el: '#comp',
+        methods: {
+            test: function() {
+                alert('test')
+            }
+        }
+    })
+
+    new Vue({
+        el: '#blog-spot',
+        data: {
+            posts: [
+                {title: 'title1', author: 'author1', content: 'content1'},
+                {title: 'title1', author: 'author1', content: 'content1'},
+                {title: 'title1', author: 'author1', content: 'content1'}
+            ]
+        },
+        mounted: function() {
+            this.posts[0].title = 'asdflkj'
+        }
+    })
+
+    new Vue({
+        el: '#base-input',
+        data: {
+            username: 'kinee',
+            label: '姓名'
+        }
+    })
+
+    new Vue({
+        el: '#inherited-prop',
+        data: {
+          child1: 'child1Value',
+          child2: 'child2Value'
+        },
+        methods: {
+            onTest1() {
+                console.log('test1 running...');
+            },
+            onTest2() {
+                console.log('test2 running');
+            }
+        }
+    })
+
+    new Vue({
+        el: '#custom-define-event-component',
+        data: {someText:'sdfgsdfg'}
+    })
+
+    new Vue({
+        el: '#slot-other-usage',
+        mounted: function(){
+            const temp=()=>{return {user:'kinee'}}
+            console.log(temp)
+            console.log(temp())
+        }
+    })
+
+
 </script>
+
+<style>
+    .redfont {color: red}
+    .bluefont {color: blue}
+</style>
 </html>
